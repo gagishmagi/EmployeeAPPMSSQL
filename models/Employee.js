@@ -16,6 +16,7 @@ var Employee = function (employee) {
 
 
 Employee.create = function (newEmp, result){
+    // dbConn.input('')
     dbConn.query(`INSERT INTO Employees (Title, FirstName, LastName) values ('${newEmp.title}','${newEmp.first_name}','${newEmp.last_name}')`, function (err, res) {
         if(err){
             console.log("error:", err)
@@ -59,6 +60,22 @@ Employee.update = function (id, employee, result) {
         }
     });
 };
+
+Employee.patchUpdate = function (id, employee, result) {
+    for (const key in employee) {
+        if (Object.hasOwnProperty.call(employee, key)) {
+            dbConn.query(`UPDATE employees SET ${key} = '${employee[key]}'  WHERE EmployeeID = ${id}`, function (err, res) {
+                if (err) {
+                    console.log("error: ", err);
+                    result(null, err);
+                } else {
+                    result(null, res);
+                }
+            });
+        }
+    }
+};
+
 
 Employee.delete = function (id, result) {
     dbConn.query(`DELETE FROM employees WHERE EmployeeID = ${id}`, function (err, res) {
