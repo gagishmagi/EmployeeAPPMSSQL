@@ -22,4 +22,7 @@ const db = sql.connect(config, (err) => {
 })
 
 
-module.exports = db
+module.exports = {
+    dbConn: db,
+    sql
+}

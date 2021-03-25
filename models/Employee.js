@@ -1,4 +1,4 @@
-const dbConn = require("../config/db.config")
+const { dbConn , sql} = require("../config/db.config")
 
 var Employee = function (employee) {
     this.first_name = employee.first_name;
@@ -16,8 +16,11 @@ var Employee = function (employee) {
 
 
 Employee.create = function (newEmp, result){
-    // dbConn.input('')
-    dbConn.query(`INSERT INTO Employees (Title, FirstName, LastName) values ('${newEmp.title}','${newEmp.first_name}','${newEmp.last_name}')`, function (err, res) {
+    dbConn
+    .input('FirstName', sql.VarChar(30), newEmp.first_name)
+    .input('LastName', sql.VarChar(30), newEmp.last_name)
+    .input('Title', sql.VarChar(30), newEmp.title)
+    .query(`INSERT INTO Employees (Title, FirstName, LastName) values (@Title,@FirstName,@LastName)`, function (err, res) {
         if(err){
             console.log("error:", err)
             return result(err, null)
@@ -40,7 +43,9 @@ Employee.findAll = function(result) {
 }
 
 Employee.findById = function(id, result) {
-    dbConn.query(`Select * from Employees where EmployeeID = ${id}`, function (err, res) {
+    dbConn
+    .input('id', sql.Int(), id)
+    .query(`Select * from Employees where EmployeeID = @id`, function (err, res) {
         if (err) {
             console.log("error:", err)
             return result(err, null)
@@ -51,7 +56,12 @@ Employee.findById = function(id, result) {
 }
 
 Employee.update = function (id, employee, result) {
-    dbConn.query(`UPDATE employees SET FirstName = '${employee.first_name}' ,LastName='${employee.last_name}',Title='${employee.title}' WHERE EmployeeID = ${id}`, function (err, res) {
+    dbConn
+    .input('FirstName', sql.VarChar(30), employee.first_name)
+    .input('LastName', sql.VarChar(30), employee.last_name)
+    .input('Title', sql.VarChar(30), employee.title)
+    .input('id', sql.Int(), id)
+    .query(`UPDATE employees SET FirstName = @FirstName ,LastName=@LastName,Title=@Title WHERE EmployeeID = @id`, function (err, res) {
         if (err) {
             console.log("error: ", err);
             result(null, err);
@@ -64,7 +74,11 @@ Employee.update = function (id, employee, result) {
 Employee.patchUpdate = function (id, employee, result) {
     for (const key in employee) {
         if (Object.hasOwnProperty.call(employee, key)) {
-            dbConn.query(`UPDATE employees SET ${key} = '${employee[key]}'  WHERE EmployeeID = ${id}`, function (err, res) {
+            dbConn
+            .input('key',sql.VarChar(30), key )
+            .input('value', sql.VarChar(30), employee[key])
+            .input('id', sql.Int(), id)
+            .query(` UPDATE employees SET @key = @value  WHERE EmployeeID = @id `, function (err, res) {
                 if (err) {
                     console.log("error: ", err);
                     result(null, err);
@@ -78,7 +92,9 @@ Employee.patchUpdate = function (id, employee, result) {
 
 
 Employee.delete = function (id, result) {
-    dbConn.query(`DELETE FROM employees WHERE EmployeeID = ${id}`, function (err, res) {
+    dbConn
+    .input('id', sql.Int(), id)
+    .query(`DELETE FROM employees WHERE EmployeeID = @id`, function (err, res) {
         if (err) {
             console.log("error: ", err);
             result(null, err);

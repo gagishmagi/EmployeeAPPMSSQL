@@ -1,19 +1,23 @@
 let Employee = require("../models/Employee")
+let Auth = require("../models/Auth")
+let bcrypt = require('bcrypt')
+const saltRounds = 10
 
 exports.findAll = function (req, res) {
+    if(req.user)
+        console.log(req.user)
     Employee.findAll(function (err, employees) {
         if (err)
             res.send(err)
         else {
             let recordset = employees.recordset
             recordset = recordset.map(record => {
-                console.log(record)
+                // console.log(record)
                 const {Title, FirstName, LastName, EmployeeID} = record
                 return {Title, FirstName, LastName, EmployeeID}
             });
             res.json({error: false, message : 'success' ,recordset})
         }
-
     })
 }
 
@@ -144,3 +148,39 @@ exports.deleteEmployee = function (req, res) {
         });
     });
 };
+
+
+exports.createNewUser = function(req,res){
+
+
+    let username = req.body.username
+    let password = req.body.password
+
+    if (req.body.password) {
+            bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
+                if (err)
+                    console.log(err)
+                password = hash
+
+                const user = {
+                    username: 'gagi',
+                    lastname: 'shmagi',
+                    pass: password
+                }
+
+                const {pass,...other} = user
+                console.log(other)
+
+                const token = Auth.generateAccessToken(other)
+
+                return res.json({
+                    token
+                })
+
+            })
+    }
+
+
+
+
+}
